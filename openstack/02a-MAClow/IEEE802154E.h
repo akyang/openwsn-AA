@@ -304,6 +304,7 @@ void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);
 void               ieee154e_setSlotDuration(uint16_t duration);
 uint16_t           ieee154e_getSlotDuration(void);
+PORT_TIMER_WIDTH   ieee154e_getStartOfSlotReference(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events

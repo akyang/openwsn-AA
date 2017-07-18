@@ -5,6 +5,10 @@
 #include "iphc.h"
 #include "idmanager.h"
 #include "openqueue.h"
+#include "debugpins.h"
+#include "opentimers.h"
+#include "IEEE802154E.h"
+#include "llatency.h"
 
 //=========================== variables =======================================
 
@@ -12,6 +16,7 @@
 //=========================== public ==========================================
 
 void openbridge_init() {
+  debugpins_init();
 }
 
 void openbridge_triggerData() {
@@ -47,6 +52,7 @@ void openbridge_triggerData() {
       //admin
       pkt->creator  = COMPONENT_OPENBRIDGE;
       pkt->owner    = COMPONENT_OPENBRIDGE;
+      //debugpins_exp_toggle();
       //l2
       pkt->l2_nextORpreviousHop.type = ADDR_64B;
       memcpy(&(pkt->l2_nextORpreviousHop.addr_64b[0]),&(input_buffer[0]),8);
@@ -68,6 +74,7 @@ void openbridge_triggerData() {
 }
 
 void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   //debugpins_exp_toggle();
    msg->owner = COMPONENT_OPENBRIDGE;
    if (msg->creator!=COMPONENT_OPENBRIDGE) {
       openserial_printError(COMPONENT_OPENBRIDGE,ERR_UNEXPECTED_SENDDONE,
@@ -89,7 +96,27 @@ void openbridge_receive(OpenQueueEntry_t* msg) {
    // prepend next hop (me)
    packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
    memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,LENGTH_ADDR64b);
-   
+
+   uint32_t values[2];
+   debugpins_exp_set();
+   //llatency_get_values(values);
+   values[0] = opentimers_getValue();
+   values[0] = ieee154e_getStartOfSlotReference();
+   debugpins_exp_clr();
+
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint32_t));
+   msg->payload[1] = (uint8_t)((values[0] & 0xff000000)>>24);
+   msg->payload[0] = (uint8_t)((values[0] & 0x00ff0000)>>16);
+   msg->payload[3] = (uint8_t)((values[0] & 0x0000ff00)>>8);
+   msg->payload[2] = (uint8_t)(values[0] & 0x000000ff);
+
+
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint32_t));
+   msg->payload[1] = (uint8_t)((values[1] & 0xff000000)>>24);
+   msg->payload[0] = (uint8_t)((values[1] & 0x00ff0000)>>16);
+   msg->payload[3] = (uint8_t)((values[1] & 0x0000ff00)>>8);
+   msg->payload[2] = (uint8_t)(values[1] & 0x000000ff);
+
    // send packet over serial (will be memcopied into serial buffer)
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    

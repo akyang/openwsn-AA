@@ -294,8 +294,9 @@ static void GPIO_C_Handler(void) {
     /* Disable the interrupts */
     IntMasterDisable();
 
+    leds_all_toggle();
     /* Eras the CCA flash page */
-    FlashMainPageErase(CC2538_FLASH_ADDRESS);
+    //FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
     /* Reset the board */
     SysCtrlReset();

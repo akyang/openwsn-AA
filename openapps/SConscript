@@ -21,6 +21,8 @@ if localEnv['board']=='python':
         'rrt',
         'cexample',
         'cstorm',
+        'uinject',
+        'llatency',
     ]
 
 # additional apps the user wants to build

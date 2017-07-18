@@ -174,6 +174,7 @@ enum {
    COMPONENT_USERIALBRIDGE             = 0x28,
    COMPONENT_UEXPIRATION               = 0x29,
    COMPONENT_UMONITOR                  = 0x2a,
+   COMPONENT_LLATENCY                  = 0x2b,
 };
 
 /**

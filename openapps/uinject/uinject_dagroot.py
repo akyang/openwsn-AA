@@ -159,6 +159,7 @@ class moteProbe(threading.Thread):
             while self.goOn:     # open serial port
                 
                 self.serial = serial.Serial(self.serialport,'115200')
+                self.serial.setDTR(0)
                 
                 while self.goOn: # read bytes from serial port
                     try:
@@ -198,6 +199,7 @@ class moteProbe(threading.Thread):
                             except Exception as err:
                                 print '{0}: invalid serial frame: {2} {1}'.format(self.name, err, tempBuf)
                             else:
+                                #print(self.inputBuf[0], ord('D'))
                                 if   self.inputBuf==[ord('R')]:
                                     with self.outputBufLock:
                                         if self.outputBuf:
@@ -205,6 +207,7 @@ class moteProbe(threading.Thread):
                                             #print ''.join(['{0:02x}'.format(ord(b)) for b in outputToWrite])
                                             self.serial.write(outputToWrite)
                                 elif self.inputBuf[0]==ord('D'):
+                                    #print("pass")
                                     if self.UINJECT_MASK == ''.join(chr(i) for i in self.inputBuf[-7:]):
                                         asn_inital  = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[3:8]]))
                                         asn_arrive  = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[-14:-9]]))
@@ -214,6 +217,9 @@ class moteProbe(threading.Thread):
                                             if counter-self.last_counter!=1:
                                                 print 'MISSING {0} packets!!'.format(counter-self.last_counter-1)
                                         self.last_counter = counter
+                                        # for elem in asn_inital:
+                                        #     print(elem)
+                                        #     print("\n")
                                         print "{0:^7} {1:^15}".format(counter, self.SLOT_DURATION*((asn_inital[0]-asn_arrive[0])+(asn_inital[1]-asn_arrive[1])*256+(asn_inital[2]-asn_arrive[2])*65536))
                                         
                                         with self.outputBufLock:
@@ -237,4 +243,4 @@ def main():
     print 'poipoi'
 
 if __name__=="__main__":
-    moteProbe('COM7')
+    moteProbe('/dev/ttyUSB0')

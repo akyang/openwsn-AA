@@ -154,7 +154,7 @@ owerror_t openserial_printError(
     errorparameter_t    arg2
 ) {
     // toggle error LED
-    leds_error_toggle();
+    //leds_error_toggle();
     
     return openserial_printInfoErrorCritical(
         SERFRAME_MOTE2PC_ERROR,

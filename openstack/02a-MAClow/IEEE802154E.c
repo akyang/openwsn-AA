@@ -248,6 +248,10 @@ void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn) {
    }
 }
 
+PORT_TIMER_WIDTH ieee154e_getStartOfSlotReference() {
+   return ieee154e_vars.startOfSlotReference;
+}
+
 /**
 /brief Format asn to asn_t structure
 

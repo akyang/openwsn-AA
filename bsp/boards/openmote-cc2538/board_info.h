@@ -17,6 +17,7 @@
 
 //=========================== defines =========================================
 
+#define SLOTDURATION_10MS
 //===== interrupt state
 
 #define INTERRUPT_DECLARATION()

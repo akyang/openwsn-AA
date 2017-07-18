@@ -26,6 +26,8 @@
 #define BSP_PIND_1              GPIO_PIN_1      //!< PD1 -- task  -RF1.10
 #define BSP_PIND_0              GPIO_PIN_0      //!< PD0 -- radio -RF1-12
 
+#define BSP_PINA_3              GPIO_PIN_3
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -40,6 +42,17 @@ void debugpins_init() {
 
    GPIOPinWrite(BSP_PINA_BASE, (BSP_PINA_4 | BSP_PINA_5), 0x00);
    GPIOPinWrite(BSP_PIND_BASE, (BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0), 0);
+}
+
+// PA3
+void debugpins_exp_toggle() {
+  bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_3);
+}
+void debugpins_exp_clr() {
+  GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_3, 0);
+}
+void debugpins_exp_set() {
+  GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_3, BSP_PINA_3);
 }
 
 // PA4

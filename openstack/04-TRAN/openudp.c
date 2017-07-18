@@ -8,6 +8,7 @@
 #include "opencoap.h"
 #include "uecho.h"
 #include "uinject.h"
+#include "llatency.h"
 #include "userialbridge.h"
 #include "rrt.h"
 

@@ -6,6 +6,8 @@
 #include "scheduler.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "sctimer.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -45,6 +47,7 @@ void uinject_init() {
         TIMER_PERIODIC,
         uinject_timer_cb
     );
+    debugpins_init();
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -101,6 +104,7 @@ void uinject_task_cb() {
       return;
    }
    
+   //uint32_t initial_time              = sctimer_readCounter();T
    pkt->owner                         = COMPONENT_UINJECT;
    pkt->creator                       = COMPONENT_UINJECT;
    pkt->l4_protocol                   = IANA_UDP;
@@ -119,12 +123,19 @@ void uinject_task_cb() {
    uinject_vars.counter++;
    
    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
+
    ieee154e_getAsn(asnArray);
+   debugpins_exp_set();
    pkt->payload[0] = asnArray[0];
    pkt->payload[1] = asnArray[1];
    pkt->payload[2] = asnArray[2];
    pkt->payload[3] = asnArray[3];
    pkt->payload[4] = asnArray[4];
+   debugpins_exp_clr();
+
+
+   // pkt->payload[5] = (uint8_t)((initial_time & 0xff00)>>8);
+   // pkt->payload[6] = (uint8_t)((initial_time & 0x00ff));
    
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);

@@ -19,6 +19,7 @@
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+#include "llatency.h"
 #include "userialbridge.h"
 #include "uexpiration.h"
 #include "uexpiration_monitor.h"
@@ -48,4 +49,6 @@ void openapps_init(void) {
    userialbridge_init();
    uexpiration_init();
    umonitor_init();
+   uinject_init();
+   llatency_init();
 }
