@@ -121,8 +121,8 @@ class moteProbe(threading.Thread):
 
     CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
     CMD_SEND_DATA   = '7e44141592000012e63b78001180bbbb0000000000000000000000000001bbbb000000000000141592000012e63b07d007d0000ea30d706f69706f697a837e'
-    SLOT_DURATION   = 0.01
-    MS_PER_TICK   = 30.5 / 100
+    SLOT_DURATION   = 10
+    MS_PER_TICK   = 30.5 / 1000
     LLATENCY_MASK    = 'llatency'
 
     def __init__(self,serialport=None):
@@ -157,7 +157,8 @@ class moteProbe(threading.Thread):
 
     def run(self):
         try:
-
+            data = 'dataTest.csv'
+            csv = open(data, 'w')
             while self.goOn:     # open serial port
 
                 self.serial = serial.Serial(self.serialport,'115200')
@@ -201,7 +202,7 @@ class moteProbe(threading.Thread):
                             except Exception as err:
                                 print '{0}: invalid serial frame: {2} {1}'.format(self.name, err, tempBuf)
                             else:
-                                print self.inputBuf[0], ord('D')
+                                # print self.inputBuf[0], ord('D')
                                 if   self.inputBuf==[ord('R')]:
                                     with self.outputBufLock:
                                         if self.outputBuf:
@@ -209,19 +210,25 @@ class moteProbe(threading.Thread):
                                             #print ''.join(['{0:02x}'.format(ord(b)) for b in outputToWrite])
                                             self.serial.write(outputToWrite)
                                 elif self.inputBuf[0]==ord('D'):
-                                    if self.LLATENCY_MASK == ''.join(chr(i) for i in self.inputBuf[-7:]):
+                                    if self.LLATENCY_MASK == ''.join(chr(i) for i in self.inputBuf[-8:]):
                                         asn_inital          = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[3:8]]))
                                         arrival_asn_ticks   = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[8:12]]))
                                         arrival_timer_ticks = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[12:16]]))
 
-                                        initial_asn_ticks   = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[-22:-18]]))
-                                        initial_timer_ticks = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[-18:-14]]))
-                                        asn_arrive          = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[-14:-9]]))
-                                        counter             = struct.unpack('<h',''.join([chr(b) for b in self.inputBuf[-9:-7]]))[0]
+                                        initial_asn_ticks   = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[-23:-19]]))
+                                        initial_timer_ticks = struct.unpack('<HH',''.join([chr(c) for c in self.inputBuf[-19:-15]]))
+                                        asn_arrive          = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[-15:-10]]))
+                                        counter             = struct.unpack('<h',''.join([chr(b) for b in self.inputBuf[-10:-8]]))[0]
 
                                         asn_diff            = (asn_inital[0]-asn_arrive[0])+(asn_inital[1]-asn_arrive[1])*256+(asn_inital[2]-asn_arrive[2])*65536
-                                        asn_timer_diff_tx   = Math.abs(initial_timer_ticks - initial_asn_ticks)
-                                        asn_timer_diff_rx   = Math.abs(arrival_timer_ticks - arrival_asn_ticks)
+                                        # print "itt, iat", initial_timer_ticks[0], initial_asn_ticks[0]
+                                        # print "itt, iat", initial_timer_ticks[1], initial_asn_ticks[1]
+
+                                        # print "att, aat", arrival_timer_ticks[0], arrival_asn_ticks[0]
+                                        # print "att, aat", arrival_timer_ticks[1], arrival_asn_ticks[1]
+                                        asn_timer_diff_tx   = abs(initial_timer_ticks[0]-initial_asn_ticks[0] + (initial_timer_ticks[1]-initial_asn_ticks[1])*256)
+                                        asn_timer_diff_rx   = abs(arrival_timer_ticks[0]-arrival_asn_ticks[0] + (arrival_timer_ticks[1]-arrival_asn_ticks[1])*256)
+                                        # print self.MS_PER_TICK*asn_timer_diff_tx, self.MS_PER_TICK*asn_timer_diff_rx
                                         latency             = self.SLOT_DURATION*asn_diff - self.MS_PER_TICK*asn_timer_diff_tx + self.MS_PER_TICK*asn_timer_diff_rx
 
                                         if self.last_counter!=None:
@@ -230,12 +237,17 @@ class moteProbe(threading.Thread):
                                         self.last_counter = counter
                                         print "{0:^7} {1:^15} {2:8.3f}".format(counter, self.SLOT_DURATION*asn_diff, latency)
 
+                                        if abs(self.SLOT_DURATION*asn_diff - latency) <= 50:
+                                            csv.write(str(counter) + ',' + str(self.SLOT_DURATION*asn_diff) + ',' + str(latency) + '\n')
+                                        
+
                                         with self.outputBufLock:
                                             self.outputBuf += [binascii.unhexlify(self.CMD_SEND_DATA)]
 
 
 
                         self.lastRxByte = rxByte
+            csv.close()
 
         except Exception as err:
             print err

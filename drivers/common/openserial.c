@@ -23,6 +23,7 @@
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
 #include "sf0.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -199,11 +200,30 @@ owerror_t openserial_printCritical(
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     uint8_t  i;
     uint8_t  asn[5];
+    uint8_t  current_ticks[4];
+    uint8_t  asn_ticks[4];
     INTERRUPT_DECLARATION();
     
     // retrieve ASN
     ieee154e_getAsn(asn);
     
+    uint32_t values[2];
+    debugpins_exp_set();
+    //llatency_get_values(values);
+    values[0] = opentimers_getValue();
+    values[1] = ieee154e_getStartOfSlotReference();
+    debugpins_exp_clr();
+
+    current_ticks[3] = (uint8_t)((values[0] & 0xff000000)>>24);
+    current_ticks[2] = (uint8_t)((values[0] & 0x00ff0000)>>16);
+    current_ticks[1] = (uint8_t)((values[0] & 0x0000ff00)>>8);
+    current_ticks[0] = (uint8_t)(values[0] & 0x000000ff);
+
+    asn_ticks[3] = (uint8_t)((values[1] & 0xff000000)>>24);
+    asn_ticks[2] = (uint8_t)((values[1] & 0x00ff0000)>>16);
+    asn_ticks[1] = (uint8_t)((values[1] & 0x0000ff00)>>8);
+    asn_ticks[0] = (uint8_t)(values[1] & 0x000000ff);
+
     DISABLE_INTERRUPTS();
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
@@ -215,6 +235,17 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     outputHdlcWrite(asn[2]);
     outputHdlcWrite(asn[3]);
     outputHdlcWrite(asn[4]);
+
+    outputHdlcWrite(asn_ticks[0]);
+    outputHdlcWrite(asn_ticks[1]);
+    outputHdlcWrite(asn_ticks[2]);
+    outputHdlcWrite(asn_ticks[3]);
+
+    outputHdlcWrite(current_ticks[0]);
+    outputHdlcWrite(current_ticks[1]);
+    outputHdlcWrite(current_ticks[2]);
+    outputHdlcWrite(current_ticks[3]);
+    
     for (i=0;i<length;i++){
         outputHdlcWrite(buffer[i]);
     }

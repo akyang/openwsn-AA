@@ -140,17 +140,17 @@ void llatency_task_cb() {
 
 
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
-   pkt->payload[1] = (uint8_t)((values[0] & 0xff000000)>>24);
-   pkt->payload[0] = (uint8_t)((values[0] & 0x00ff0000)>>16);
-   pkt->payload[3] = (uint8_t)((values[0] & 0x0000ff00)>>8);
-   pkt->payload[2] = (uint8_t)(values[0] & 0x000000ff);
+   pkt->payload[3] = (uint8_t)((values[0] & 0xff000000)>>24);
+   pkt->payload[2] = (uint8_t)((values[0] & 0x00ff0000)>>16);
+   pkt->payload[1] = (uint8_t)((values[0] & 0x0000ff00)>>8);
+   pkt->payload[0] = (uint8_t)(values[0] & 0x000000ff);
 
 
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
-   pkt->payload[1] = (uint8_t)((values[1] & 0xff000000)>>24);
-   pkt->payload[0] = (uint8_t)((values[1] & 0x00ff0000)>>16);
-   pkt->payload[3] = (uint8_t)((values[1] & 0x0000ff00)>>8);
-   pkt->payload[2] = (uint8_t)(values[1] & 0x000000ff);
+   pkt->payload[3] = (uint8_t)((values[1] & 0xff000000)>>24);
+   pkt->payload[2] = (uint8_t)((values[1] & 0x00ff0000)>>16);
+   pkt->payload[1] = (uint8_t)((values[1] & 0x0000ff00)>>8);
+   pkt->payload[0] = (uint8_t)(values[1] & 0x000000ff);
 
    
    if ((openudp_send(pkt))==E_FAIL) {

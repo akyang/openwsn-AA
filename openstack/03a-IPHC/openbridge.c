@@ -97,28 +97,10 @@ void openbridge_receive(OpenQueueEntry_t* msg) {
    packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
    memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,LENGTH_ADDR64b);
 
-   uint32_t values[2];
-   debugpins_exp_set();
-   //llatency_get_values(values);
-   values[0] = opentimers_getValue();
-   values[0] = ieee154e_getStartOfSlotReference();
-   debugpins_exp_clr();
-
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint32_t));
-   msg->payload[1] = (uint8_t)((values[0] & 0xff000000)>>24);
-   msg->payload[0] = (uint8_t)((values[0] & 0x00ff0000)>>16);
-   msg->payload[3] = (uint8_t)((values[0] & 0x0000ff00)>>8);
-   msg->payload[2] = (uint8_t)(values[0] & 0x000000ff);
-
-
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint32_t));
-   msg->payload[1] = (uint8_t)((values[1] & 0xff000000)>>24);
-   msg->payload[0] = (uint8_t)((values[1] & 0x00ff0000)>>16);
-   msg->payload[3] = (uint8_t)((values[1] & 0x0000ff00)>>8);
-   msg->payload[2] = (uint8_t)(values[1] & 0x000000ff);
-
    // send packet over serial (will be memcopied into serial buffer)
+   debugpins_exp_toggle();
    openserial_printData((uint8_t*)(msg->payload),msg->length);
+   debugpins_exp_toggle();
    
    // free packet
    openqueue_freePacketBuffer(msg);
