@@ -99,7 +99,6 @@ void llatency_task_cb() {
    // if you get here, send a packet
    debugpins_exp_set();
    llatency_get_values(values);
-   debugpins_exp_clr();
    // get a free packet buffer
    pkt = openqueue_getFreePacketBuffer(COMPONENT_LLATENCY);
    if (pkt==NULL) {
@@ -156,6 +155,7 @@ void llatency_task_cb() {
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
+   debugpins_exp_clr();
 }
 
 
