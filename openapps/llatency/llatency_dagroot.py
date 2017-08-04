@@ -237,8 +237,8 @@ class moteProbe(threading.Thread):
                                         self.last_counter = counter
                                         print "{0:^7} {1:^15} {2:8.3f}".format(counter, self.SLOT_DURATION*asn_diff, latency)
 
-                                        if abs(self.SLOT_DURATION*asn_diff - latency) <= 50:
-                                            csv.write(str(counter) + ',' + str(self.SLOT_DURATION*asn_diff) + ',' + str(latency) + '\n')
+                                        # if abs(self.SLOT_DURATION*asn_diff - latency) <= 50:
+                                        csv.write(str(counter) + ',' + str(self.SLOT_DURATION*asn_diff) + ',' + str(latency) + '\n')
                                         
 
                                         with self.outputBufLock:
